@@ -28,35 +28,16 @@ var geoserver = function( koop ){
     koop.Cache.db.serviceGet( 'geoserver:services', parseInt(id) || id, callback);
   };
 
-  geoserver.geoserver_path = '/ckan/api/3/action/package_show';
-  geoserver.geoserver_list_path = '/ckan/api/3/action/package_list?-d';
+   // got the service and get the item
+  geoserver.getResource = function( host, id, options, callback ){
+    var self = this,
+      type = 'Cloudant',
+      key = [host,id].join('::');
 
-  geoserver.getAll = function( host, options, callback ){
-    var self = this;
+    koop.Cache.get( type, key, options, function(err, entry ){
+      if ( err ){
 
-    var url = host + self.geoserver_list_path,
-      result, links = [];
-    request.get(url, function(err, data, response ){
-      if (err) {
-        callback(err, null);
-      } else {
-        result = JSON.parse(response).result;
-        callback( null, result );
-      }
-    });
-  };
-
-
-  geoserver.find = function( id, options, callback ){
-
-    var type = 'geoserver';
-
-    // check the cache for data with this type & id
-    koop.Cache.get( type, id, options, function(err, entry ){
-      if ( err){
-        // if we get an err then get the data and insert it
-        // URL of dwd's WFS geoserver endpoint, which serves geoJSONs
-        var url = 'http://maps.dwd.de/geoserver/dwd/ows?service=WFS&version=1.0.0&request=GetFeature&typeName='+id+'&outputFormat=application/json';
+        var url = host + '/geoserver/' + id + 'ows?service=WFS&version=1.0.0&request=GetFeature&typeName=' + options.view + '&outputFormat=application/json';
 
         request.get(url, function(e, res){
           var geojson = JSON.parse(res.body);
@@ -73,6 +54,8 @@ var geoserver = function( koop ){
       }
     });
   };
+
+
 
   // drops the item from the cache
   geoserver.dropItem = function( host, itemId, options, callback ){

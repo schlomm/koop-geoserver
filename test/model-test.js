@@ -2,30 +2,57 @@ var should = require('should'),
   config = require('config'),
   koop = require('koop-server/lib');
 
-before(function (done) {
+var data = require('./fixtures/earthquakes.json');
+
+before(function(done){
+  // setup koop 
   koop.Cache.db = koop.PostGIS.connect( config.db.postgis.conn );
-  geoserver = new require('../models/geoserver.js')( koop );
+  var data_dir = __dirname + '/output/';
+  koop.Cache.data_dir = data_dir;
+  Socrata = new require('../models/Socrata.js')( koop );
   done();
 });
 
-describe('geoserver Model', function(){
+describe('Socrata Model', function(){
 
-    describe('when getting data', function(){
-      it('should find and return geojson', function(done){
-        geoserver.find(1, {}, function(err, data){
-          // there should not be any errors
+    afterEach(function(done){
+      done();
+    });
+
+    describe('socrata model methods', function() {
+      before(function(done ){
+        done();
+      });
+      it('toGeoJSON should err when given no data', function(done) {
+        Socrata.toGeojson([], 'location', function(err, geojson){
+          should.exist(err);
+          should.not.exist( geojson );
+          return done();
+        });
+      });
+
+      it('toGeoJSON should return geojson', function(done) {
+        Socrata.toGeojson(data, 'location', function(err, geojson){
           should.not.exist(err);
-          // should always return the data as geojson
-          should.exist(data);
-          // data should be an array (support multi layer responses)
-          data.length.should.equal(1);
-          // make sure we have a feature collection
-          data[0].type.should.equal('FeatureCollection');
-          done();
+          should.exist( geojson );
+          geojson.features.length.should.not.equal(0);
+          return done();
+        });
+      });
+
+      it('getResource should return geojson', function(done) {
+        Socrata.getResource('https://data.seattle.gov', '2tje-83f6', {}, function(err, geojson){
+          should.not.exist(err);
+          should.exist( geojson );
+          geojson[0].features.length.should.not.equal(0);
+          return done();
         });
       });
 
     });
 
 });
+
+
+
 
