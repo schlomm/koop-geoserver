@@ -27,3 +27,8 @@ koop-dwd layers are e accessed by adding the id to /dwd/:dwd_layer_id, and optio
 
 ### Limitations
 
+
+Example Geoserver:  
+http://map.ices.dk/geoserver/web/?wicket:bookmarkablePage=:org.geoserver.web.demo.MapPreviewPage  
+http://maps.dwd.de/geoserver/web/?wicket:bookmarkablePage=:org.geoserver.web.demo.MapPreviewPage  
+
